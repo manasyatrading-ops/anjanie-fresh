@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANJANIÉ STYLES | Owner Admin</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
+header{padding:20px;background:#17130e;border-bottom:1px solid #806538}
+h1,h2{color:#d8b66e;font-family:Georgia,serif}
+main{max-width:850px;margin:auto;padding:20px}
+.card{background:#171512;border:1px solid #59482c;padding:22px;margin:18px 0;border-radius:12px}
+input,textarea,select{display:block;width:100%;padding:15px;margin:12px 0;background:#090909;color:white;border:1px solid #65502d;border-radius:6px;font-size:16px}
+button{padding:13px 18px;background:#d8b66e;color:#111;border:0;border-radius:6px;font-weight:bold;margin:5px 3px;cursor:pointer}
+.danger{background:#902e2e;color:white}
+.secondary{background:#34302a;color:white}
+.hidden{display:none!important}
+small{color:#ccc}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:#211c13;padding:17px;border:1px solid #58472b;border-radius:8px}
+.stat strong{display:block;font-size:24px;color:#d8b66e;margin-top:8px}
+.product{border-bottom:1px solid #59482c;padding:18px 0;overflow:hidden}
+.product img{width:85px;height:100px;object-fit:cover;border-radius:5px;margin:3px}
+.photos{display:flex;gap:7px;flex-wrap:wrap}
+#productMsg,#loginMsg{color:#e0c17e}
+label{display:block;margin-top:14px;color:#ddd}
+.actions{margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+<h1>ANJANIÉ STYLES</h1>
+<small>PREMIUM OWNER CONTROL PANEL</small>
+</header>
+
+<main>
+<section class="card" id="login">
+<h2>Owner Login</h2>
+<form id="loginForm">
+<input name="username" placeholder="Owner username" required>
+<input name="password" type="password" placeholder="Password" required>
+<button>LOGIN SECURELY</button>
+</form>
+<p id="loginMsg"></p>
+</section>
+
+<section id="dashboard" class="hidden">
+<div class="card">
+<h2>Inventory Dashboard</h2>
+<div class="stats">
+<div class="stat">Total Products<strong id="total">0</strong></div>
+<div class="stat">Active Products<strong id="active">0</strong></div>
+<div class="stat">Total Stock<strong id="stockTotal">0</strong></div>
+<div class="stat">Inventory Value<strong id="value">₹0</strong></div>
+</div>
+</div>
+
+<div class="card">
+<h2 id="formHeading">Product Management</h2>
+<form id="productForm">
+<input type="hidden" name="editingId">
+<input name="name" placeholder="Product name" maxlength="150" required>
+
+<select name="category" required>
+<option value="">Select category</option>
+<option>Lehenga</option>
+<option>Saree</option>
+<option>Suit</option>
+<option>Gown</option>
+<option>Party Wear</option>
+<option>Bridal Wear</option>
+<option>Other</option>
+</select>
+
+<input name="price" type="number" min="1" step="0.01" placeholder="Price in INR" required>
+<textarea name="description" placeholder="Product description" maxlength="2000"></textarea>
+<input name="sizes" placeholder="Sizes e.g. S, M, L, XL">
+<input name="colours" placeholder="Colours e.g. Red, Wine, Gold">
+<input name="stock" type="number" min="0" step="1" placeholder="Available stock quantity" value="0" required>
+
+<label>Product photos (maximum 5 new photos, 5 MB each)</label>
+<input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+<div id="existingPhotos" class="photos"></div>
+
+<button type="submit" id="saveButton">ADD PRODUCT</button>
+<button type="button" id="cancelEdit" class="secondary hidden">CANCEL EDIT</button>
+</form>
+<p id="productMsg"></p>
+</div>
+
+<div class="card">
+<h2>Product Inventory</h2>
+<input id="search" placeholder="Search products by name...">
+<select id="categoryFilter">
+<option value="">All categories</option>
+<option>Lehenga</option>
+<option>Saree</option>
+<option>Suit</option>
+<option>Gown</option>
+<option>Party Wear</option>
+<option>Bridal Wear</option>
+<option>Other</option>
+</select>
+<div id="productList">Loading...</div>
+</div>
+<button id="logout">LOG OUT</button>
+</section>
+</main>
+
+<script>
+const login=document.getElementById('login');
+const dashboard=document.getElementById('dashboard');
+const productForm=document.getElementById('productForm');
+let products=[];
+
+async function api(url,options={}){
+ const response=await fetch(url,{...options,credentials:'same-origin'});
+ const data=await response.json();
+ if(!response.ok)throw Error(data.error||'Request failed');
+ return data;
+}
+
+function escapeHTML(value){
+ return String(value??'').replace(/[&<>"']/g,c=>({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
+}
+
+function money(value){
+ return '₹'+Number(value||0).toLocaleString('en-IN');
+}
+
+async function load(){
+ try{
+  const data=await api('/api/products');
+  products=data.products||[];
+  document.getElementById('total').textContent=products.length;
+  document.getElementById('active').textContent=products.filter(p=>p.status!=='inactive'&&Number(p.stock||0)>0).length;
+  document.getElementById('stockTotal').textContent=products.reduce((s,p)=>s+Number(p.stock||0),0);
+  document.getElementById('value').textContent=money(products.reduce((s,p)=>s+Number(p.price||0)*Number(p.stock||0),0));
+  renderProducts();
+ }catch(e){
+  document.getElementById('productList').textContent=e.message;
+ }
+}
+
+function renderProducts(){
+ const query=document.getElementById('search').value.toLowerCase().trim();
+ const category=document.getElementById('categoryFilter').value;
+
+ const filtered=products.filter(p=>
+  p.name.toLowerCase().includes(query)&&(!category||p.category===category)
+ );
+
+ document.getElementById('productList').innerHTML=filtered.length?
+ filtered.map(p=>{
+  const photos=Array.isArray(p.images)?p.images:(p.image?[p.image]:[]);
+  const status=Number(p.stock||0)>0?'IN STOCK':'OUT OF STOCK';
+  return `
+  <div class="product">
+   <div class="photos">
+   ${photos.map(src=>`<img src="${escapeHTML(src)}" alt="Product photo">`).join('')}
+   </div>
+   <h3>${escapeHTML(p.name)}</h3>
+   <small>${escapeHTML(p.category)} · ${money(p.price)}</small><br>
+   <small>Sizes: ${escapeHTML((p.sizes||[]).join(', ')||'Not specified')}</small><br>
+   <small>Colours: ${escapeHTML((p.colours||[]).join(', ')||'Not specified')}</small><br>
+   <small>Stock: ${Number(p.stock||0)} · ${status}</small><br>
+   <small>${escapeHTML(p.description||'')}</small>
+   <div class="actions">
+    <button data-edit="${escapeHTML(p.id)}">EDIT</button>
+    <button class="danger" data-delete="${escapeHTML(p.id)}">DELETE</button>
+   </div>
+  </div>`;
+ }).join(''):'No matching products found.';
+
+ document.querySelectorAll('[data-edit]').forEach(b=>{
+  b.addEventListener('click',()=>editProduct(b.dataset.edit));
+ });
+ document.querySelectorAll('[data-delete]').forEach(b=>{
+  b.addEventListener('click',()=>removeProduct(b.dataset.delete));
+ });
+}
+
+function editProduct(id){
+ const p=products.find(x=>x.id===id);
+ if(!p)return;
+
+ productForm.elements.editingId.value=p.id;
+ productForm.elements.name.value=p.name||'';
+ productForm.elements.category.value=p.category||'';
+ productForm.elements.price.value=p.price||'';
+ productForm.elements.description.value=p.description||'';
+ productForm.elements.sizes.value=(p.sizes||[]).join(', ');
+ productForm.elements.colours.value=(p.colours||[]).join(', ');
+ productForm.elements.stock.value=Number(p.stock||0);
+ productForm.elements.images.value='';
+
+ const photos=Array.isArray(p.images)?p.images:(p.image?[p.image]:[]);
+ document.getElementById('existingPhotos').innerHTML=photos.map(src=>
+  `<img src="${escapeHTML(src)}" style="width:75px;height:85px;object-fit:cover;border-radius:5px">`
+ ).join('');
+
+ document.getElementById('formHeading').textContent='Edit Product';
+ document.getElementById('saveButton').textContent='UPDATE PRODUCT';
+ document.getElementById('cancelEdit').classList.remove('hidden');
+ document.getElementById('productMsg').textContent='Existing photos are preserved. New photos will be added.';
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetEdit(){
+ productForm.reset();
+ productForm.elements.editingId.value='';
+ productForm.elements.stock.value=0;
+ document.getElementById('existingPhotos').innerHTML='';
+ document.getElementById('formHeading').textContent='Product Management';
+ document.getElementById('saveButton').textContent='ADD PRODUCT';
+ document.getElementById('cancelEdit').classList.add('hidden');
+ document.getElementById('productMsg').textContent='';
+}
+
+document.getElementById('loginForm').onsubmit=async e=>{
+ e.preventDefault();
+ const f=new FormData(e.target);
+ try{
+  await api('/api/admin/login',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    username:f.get('username'),
+    password:f.get('password')
+   })
+  });
+  login.classList.add('hidden');
+  dashboard.classList.remove('hidden');
+  load();
+ }catch(err){
+  document.getElementById('loginMsg').textContent=err.message;
+ }
+};
+
+productForm.onsubmit=async e=>{
+ e.preventDefault();
+ const form=new FormData(productForm);
+ const id=form.get('editingId');
+ form.delete('editingId');
+
+ try{
+  await api(id?'/api/admin/products/'+encodeURIComponent(id):'/api/admin/products',{
+   method:id?'PUT':'POST',
+   body:form
+  });
+  document.getElementById('productMsg').textContent=id?'Product updated successfully.':'Product added successfully.';
+  resetEdit();
+  load();
+ }catch(err){
+  document.getElementById('productMsg').textContent=err.message;
+ }
+};
+
+async function removeProduct(id){
+ if(!confirm('Permanently delete this product and its photos?'))return;
+ try{
+  await api('/api/admin/products/'+encodeURIComponent(id),{method:'DELETE'});
+  load();
+ }catch(e){alert(e.message);}
+}
+
+document.getElementById('cancelEdit').onclick=resetEdit;
+document.getElementById('search').oninput=renderProducts;
+document.getElementById('categoryFilter').onchange=renderProducts;
+
+document.getElementById('logout').onclick=async()=>{
+ try{await api('/api/admin/logout',{method:'POST'});}catch(e){}
+ dashboard.classList.add('hidden');
+ login.classList.remove('hidden');
+};
+</script>
+</body>
+</html>

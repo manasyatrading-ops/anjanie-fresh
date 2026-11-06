@@ -1,0 +1,21 @@
+[
+  {
+    "id": "7aa00a44-e4a1-4a40-9e18-55b7d94f5454",
+    "name": "Morni",
+    "category": "Lehenga",
+    "price": 25000,
+    "description": "",
+    "sizes": [
+      "All size"
+    ],
+    "colours": [
+      "Red blue"
+    ],
+    "stock": 10,
+    "status": "active",
+    "images": [
+      "/uploads/283e8221-f115-4093-ad09-af6b90b9d781.png"
+    ],
+    "image": "/uploads/283e8221-f115-4093-ad09-af6b90b9d781.png"
+  }
+]

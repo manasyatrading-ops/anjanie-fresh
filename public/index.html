@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0908">
+<meta name="description" content="Discover premium Indian bridal fashion at ANJANIÉ STYLES.">
+<title>ANJANIÉ STYLES | Luxury Bridal Boutique</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#d9b873;--bg:#0b0908;--card:#18140f;--muted:#aaa}
+body{background:var(--bg);color:#fff;font-family:Georgia,serif}
+button{cursor:pointer;font-family:inherit}
+header{position:sticky;top:0;z-index:4;background:#100e0ceF;backdrop-filter:blur(14px);padding:17px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #594728}
+.logo{color:var(--gold);font-size:21px;letter-spacing:3px}
+.navbtn{background:transparent;color:var(--gold);border:1px solid var(--gold);padding:11px 17px}
+.hero{min-height:490px;padding:80px 8%;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(90deg,#080706 5%,#080706e8 45%,#08070633),url('https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=1500') center/cover}
+.hero small{color:var(--gold);letter-spacing:4px}
+.hero h1{font-size:clamp(40px,7vw,72px);font-weight:normal;line-height:1.12;max-width:650px;margin:23px 0}
+.hero p{color:#ddd;line-height:1.9;max-width:470px}
+.hero button{align-self:flex-start;margin-top:25px;background:var(--gold);color:#111;border:0;padding:15px 25px;font-weight:bold}
+.section{padding:65px 6%}
+h2{color:var(--gold);font-size:32px;font-weight:normal;text-align:center}
+.sub{text-align:center;color:#aaa;margin:12px 0 32px;font:13px Arial;line-height:1.7}
+.filters{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-bottom:30px}
+.filters button{background:#171512;color:#ddd;border:1px solid #594728;padding:10px 15px}
+.filters button.active{background:var(--gold);color:#111}
+.products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.product{background:var(--card);border:1px solid #493b27;overflow:hidden}
+.product img{width:100%;height:330px;object-fit:cover;background:#29231b;display:block}
+.info{padding:18px}
+.info h3{font-size:19px;font-weight:normal}
+.info p{font:13px Arial;color:#aaa;margin:10px 0;line-height:1.6}
+.price{color:var(--gold);font-size:20px;margin:14px 0}
+.stock{font:12px Arial;color:#b8d9a5;margin:8px 0}
+.stock.out{color:#e59b9b}
+.actions{display:flex;gap:8px}
+.actions button{flex:1;padding:12px 5px;border:0;font-size:12px;font-weight:bold}
+.details{background:#302719;color:#e6c989}
+.add{background:var(--gold);color:#111}
+.add:disabled{background:#555;color:#bbb;cursor:not-allowed}
+.empty{text-align:center;padding:40px 15px;border:1px dashed #65502d;color:#ccc;grid-column:1/-1;line-height:2}
+.cart{position:fixed;inset:0;background:#000c;z-index:8;display:none;justify-content:flex-end}
+.cart.show{display:flex}
+.panel{background:#15130f;width:min(440px,100%);height:100%;padding:22px;overflow:auto}
+.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.panel h2{text-align:left;font-size:25px}
+.close{background:none;color:white;border:0;font-size:28px}
+.cartitem{padding:15px 0;border-bottom:1px solid #594728}
+.cartitem button{background:#30271a;color:white;border:0;padding:7px 11px;margin:9px 5px 0 0}
+.total{color:var(--gold);font-size:23px;margin:25px 0}
+.checkout{width:100%;background:#218b50;color:white;border:0;padding:16px;font-size:15px}
+.modal{position:fixed;inset:0;background:#000e;z-index:10;display:none;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.modalbox{background:#17130f;border:1px solid #806538;border-radius:8px;width:min(600px,100%);max-height:90vh;overflow:auto;padding:20px}
+.modalbox h2{text-align:left;margin:15px 0}
+.modalbox img{width:100%;height:320px;object-fit:contain;background:#090909}
+.thumbs{display:flex;gap:8px;overflow-x:auto;margin:10px 0}
+.thumbs img{width:65px;height:75px;object-fit:cover;cursor:pointer;border:1px solid #806538}
+.modalbox select{width:100%;padding:13px;margin:9px 0;background:#090909;color:white;border:1px solid #65502d}
+.modalbox .add{width:100%;padding:14px;margin-top:10px;border:0}
+footer{text-align:center;padding:38px 15px;color:#aaa;border-top:1px solid #594728;line-height:2}
+footer .logo{margin-bottom:10px}
+@media(max-width:700px){
+header{padding:15px 4%}.logo{font-size:16px;letter-spacing:2px}
+.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.product img{height:210px}.info{padding:12px}
+.info h3{font-size:16px}.info p{font-size:12px}
+.section{padding:48px 4%}.hero{min-height:410px;padding:55px 6%}
+.hero h1{font-size:43px}
+.actions{flex-direction:column}
+.modalbox img{height:250px}
+}
+@media(max-width:370px){.products{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">ANJANIÉ STYLES</div>
+<button class="navbtn" onclick="openCart()">BAG (<span id="count">0</span>)</button>
+</header>
+
+<section class="hero">
+<small>THE ART OF INDIAN BRIDAL</small>
+<h1>Elegance Woven Into Every Moment.</h1>
+<p>Discover timeless bridal fashion, exquisite craftsmanship and unforgettable designs for your most special occasions.</p>
+<button onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">EXPLORE COLLECTION</button>
+</section>
+
+<section class="section" id="collection">
+<h2>Our Collection</h2>
+<p class="sub">A beautiful selection of Indian bridal and occasion wear.</p>
+<div class="filters" id="filters">
+<button class="active" data-category="All">All</button>
+</div>
+<div class="products" id="products">
+<div class="empty">Loading our collection...</div>
+</div>
+</section>
+
+<div class="modal" id="detailsModal">
+<div class="modalbox">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="color:#d9b873;letter-spacing:2px">PRODUCT DETAILS</span>
+<button class="close" onclick="closeDetails()">×</button>
+</div>
+<img id="mainPhoto" alt="Product image">
+<div class="thumbs" id="thumbs"></div>
+<h2 id="detailName"></h2>
+<p id="detailDescription" style="color:#bbb;line-height:1.7"></p>
+<div class="price" id="detailPrice"></div>
+<p id="detailStock" class="stock"></p>
+<label for="sizeSelect">Select Size</label>
+<select id="sizeSelect"><option value="">Choose size</option></select>
+<label for="colourSelect">Select Colour</label>
+<select id="colourSelect"><option value="">Choose colour</option></select>
+<button class="add" id="detailAdd">ADD TO BAG</button>
+</div>
+</div>
+
+<div class="cart" id="cart">
+<div class="panel">
+<div class="panelhead">
+<h2>Your Shopping Bag</h2>
+<button class="close" onclick="closeCart()">×</button>
+</div>
+<div id="cartItems"></div>
+<div class="total">Total: ₹<span id="total">0</span></div>
+<button class="checkout" onclick="checkout()">ORDER ON WHATSAPP</button>
+<p style="color:#aaa;font:12px Arial;margin-top:15px;line-height:1.6">Our team will confirm product availability, delivery details and final order information on WhatsApp.</p>
+</div>
+</div>
+
+<footer>
+<div class="logo">ANJANIÉ STYLES</div>
+<p>Luxury Bridal Fashion</p>
+<p>WhatsApp: +91 6393932096</p>
+<p>Email: Anju14052001@gmail.com</p>
+<p>© 2026 ANJANIÉ STYLES. All rights reserved.</p>
+</footer>
+
+<script>
+let products=[];
+let selectedProduct=null;
+let cart=[];
+
+try{
+ const saved=JSON.parse(localStorage.getItem('anjanieCart')||'[]');
+ if(Array.isArray(saved))cart=saved.filter(x=>x&&x.id&&Number(x.qty)>0);
+}catch(e){cart=[]}
+
+const money=n=>Number(n||0).toLocaleString('en-IN');
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function getPhotos(p){
+ const list=Array.isArray(p.images)?p.images:[];
+ if(p.image)list.unshift(p.image);
+ return [...new Set(list)].filter(Boolean);
+}
+
+function available(p){
+ return p.status!=='inactive'&&Number(p.stock||0)>0;
+}
+
+async function loadProducts(){
+ const box=document.getElementById('products');
+ try{
+  const response=await fetch('/api/products');
+  const data=await response.json();
+  if(!response.ok||!data.success)throw Error();
+  products=data.products||[];
+  buildFilters();
+  renderProducts();
+  saveCart();
+ }catch(e){
+  box.innerHTML='<div class="empty">Unable to load collection. Please refresh the page.</div>';
+ }
+}
+
+function buildFilters(){
+ const categories=[...new Set(products.map(p=>p.category).filter(Boolean))];
+ document.getElementById('filters').innerHTML=
+ ['All',...categories].map((c,i)=>
+ `<button data-category="${safe(c)}" class="${i===0?'active':''}">${safe(c==='All'?'All':c)}</button>`
+ ).join('');
+ document.querySelectorAll('[data-category]').forEach(b=>{
+  b.onclick=()=>{
+   document.querySelectorAll('[data-category]').forEach(x=>x.classList.remove('active'));
+   b.classList.add('active');
+   renderProducts(b.dataset.category);
+  };
+ });
+}
+
+function renderProducts(category='All'){
+ const box=document.getElementById('products');
+ const list=products.filter(p=>
+  (category==='All'||p.category===category)
+ );
+ if(!list.length){
+  box.innerHTML='<div class="empty">Our collection is being prepared.<br>Contact us on WhatsApp for enquiries.</div>';
+  return;
+ }
+
+ box.innerHTML=list.map(p=>{
+  const photos=getPhotos(p);
+  const image=photos[0]||'';
+  const inStock=available(p);
+  return `
+  <article class="product">
+   <img src="${safe(image)}" alt="${safe(p.name)}" onerror="this.style.display='none'">
+   <div class="info">
+    <h3>${safe(p.name)}</h3>
+    <p>${safe(p.description||'Elegant design from our collection.')}</p>
+    <div class="price">₹${money(p.price)}</div>
+    <div class="stock ${inStock?'':'out'}">${inStock?'In Stock · '+Number(p.stock)+' available':'Currently unavailable'}</div>
+    <div class="actions">
+     <button class="details" data-detail="${safe(p.id)}">VIEW DETAILS</button>
+     <button class="add" data-add="${safe(p.id)}" ${inStock?'':'disabled'}>ADD TO BAG</button>
+    </div>
+   </div>
+  </article>`;
+ }).join('');
+
+ document.querySelectorAll('[data-detail]').forEach(b=>{
+  b.onclick=()=>showDetails(b.dataset.detail);
+ });
+ document.querySelectorAll('[data-add]').forEach(b=>{
+  b.onclick=()=>showDetails(b.dataset.add);
+ });
+}
+
+function showDetails(id){
+ const p=products.find(x=>String(x.id)===String(id));
+ if(!p)return;
+ selectedProduct=p;
+ const photos=getPhotos(p);
+ const main=document.getElementById('mainPhoto');
+ main.src=photos[0]||'';
+ document.getElementById('thumbs').innerHTML=photos.map((src,i)=>
+ `<img src="${safe(src)}" alt="Photo ${i+1}" data-photo="${i}">`
+ ).join('');
+ document.querySelectorAll('[data-photo]').forEach(b=>{
+  b.onclick=()=>main.src=photos[Number(b.dataset.photo)];
+ });
+ document.getElementById('detailName').textContent=p.name;
+ document.getElementById('detailDescription').textContent=p.description||'Elegant design from our collection.';
+ document.getElementById('detailPrice').textContent='₹'+money(p.price);
+ document.getElementById('detailStock').textContent=available(p)?'In stock: '+p.stock:'Currently unavailable';
+
+ const sizes=Array.isArray(p.sizes)?p.sizes:[];
+ const colours=Array.isArray(p.colours)?p.colours:[];
+ document.getElementById('sizeSelect').innerHTML=
+ '<option value="">Choose size</option>'+sizes.map(x=>`<option value="${safe(x)}">${safe(x)}</option>`).join('');
+ document.getElementById('colourSelect').innerHTML=
+ '<option value="">Choose colour</option>'+colours.map(x=>`<option value="${safe(x)}">${safe(x)}</option>`).join('');
+
+ document.getElementById('detailAdd').disabled=!available(p);
+ document.getElementById('detailAdd').onclick=()=>addToCart(p.id);
+ document.getElementById('detailsModal').classList.add('show');
+}
+
+function closeDetails(){
+ document.getElementById('detailsModal').classList.remove('show');
+}
+
+function addToCart(id){
+ const p=products.find(x=>String(x.id)===String(id));
+ if(!p||!available(p))return alert('This product is currently unavailable.');
+
+ const sizes=Array.isArray(p.sizes)?p.sizes:[];
+ const colours=Array.isArray(p.colours)?p.colours:[];
+ const size=document.getElementById('sizeSelect').value;
+ const colour=document.getElementById('colourSelect').value;
+
+ if(sizes.length&&!size)return alert('Please select a size.');
+ if(colours.length&&!colour)return alert('Please select a colour.');
+
+ const key=[String(id),size,colour].join('|');
+ const item=cart.find(x=>x.key===key);
+ const qty=item?item.qty:0;
+
+ if(qty>=Number(p.stock))return alert('Available stock limit reached.');
+
+ if(item)item.qty++;
+ else cart.push({
+  key,id:p.id,name:p.name,price:Number(p.price),
+  qty:1,size,colour
+ });
+
+ saveCart();
+ closeDetails();
+ openCart();
+}
+
+function saveCart(){
+ localStorage.setItem('anjanieCart',JSON.stringify(cart));
+ document.getElementById('count').textContent=cart.reduce((s,x)=>s+Number(x.qty||0),0);
+ renderCart();
+}
+
+function renderCart(){
+ document.getElementById('cartItems').innerHTML=cart.length?cart.map((x,i)=>`
+ <div class="cartitem">
+ <strong>${safe(x.name)}</strong>
+ <p>₹${money(x.price)} × ${Number(x.qty)}</p>
+ <small>${x.size?'Size: '+safe(x.size):''} ${x.colour?' · Colour: '+safe(x.colour):''}</small><br>
+ <button onclick="changeQty(${i},-1)">−</button>
+ <button onclick="changeQty(${i},1)">+</button>
+ <button onclick="removeItem(${i})">Remove</button>
+ </div>`).join(''):'<p style="color:#aaa">Your shopping bag is empty.</p>';
+
+ document.getElementById('total').textContent=money(cart.reduce((s,x)=>s+Number(x.price)*Number(x.qty),0));
+}
+
+function changeQty(i,n){
+ const item=cart[i];
+ if(!item)return;
+ const p=products.find(x=>String(x.id)===String(item.id));
+ if(n>0&&(!p||!available(p)||item.qty>=Number(p.stock))){
+  alert('Available stock limit reached.');
+  return;
+ }
+ item.qty+=n;
+ if(item.qty<=0)cart.splice(i,1);
+ saveCart();
+}
+
+function removeItem(i){
+ cart.splice(i,1);
+ saveCart();
+}
+
+function openCart(){document.getElementById('cart').classList.add('show')}
+function closeCart(){document.getElementById('cart').classList.remove('show')}
+
+function checkout(){
+ if(!cart.length)return alert('Your shopping bag is empty.');
+
+ for(const item of cart){
+  const p=products.find(x=>String(x.id)===String(item.id));
+  if(!p||!available(p)||Number(item.qty)>Number(p.stock)){
+   return alert('Stock has changed for '+item.name+'. Please refresh and check your bag.');
+  }
+ }
+
+ let message='Hello ANJANIÉ STYLES! I would like to place an order enquiry:%0A%0A';
+ cart.forEach(x=>{
+  const details=[
+   x.name,
+   'Quantity: '+x.qty,
+   'Price: ₹'+(x.price*x.qty),
+   x.size?'Size: '+x.size:'',
+   x.colour?'Colour: '+x.colour:''
+  ].filter(Boolean).join(' | ');
+  message+=encodeURIComponent(details)+'%0A';
+ });
+ message+='%0ATotal: ₹'+cart.reduce((s,x)=>s+x.price*x.qty,0);
+ window.open('https://wa.me/916393932096?text='+message,'_blank');
+}
+
+document.getElementById('detailsModal').addEventListener('click',e=>{
+ if(e.target.id==='detailsModal')closeDetails();
+});
+document.getElementById('cart').addEventListener('click',e=>{
+ if(e.target.id==='cart')closeCart();
+});
+
+saveCart();
+loadProducts();
+</script>
+</body>
+</html>
